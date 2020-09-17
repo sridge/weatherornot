@@ -1,0 +1,52 @@
+State	F	C	Rank
+Alabama	46.5	8.1	7
+Alaska	2.6	16.3	50
+Arizona	43.6	6.4	10
+Arkansas	41.5	5.3	12
+California	46.2	7.9	8
+Colorado	25.8	-3.4	35
+Connecticut	28.5	-1.9	30
+Delaware	36.1	2.3	16
+Florida	59.4	15.2	2
+Georgia	47.8	8.8	5
+Hawaii	67.4	19.7	1
+Idaho	25.4	-3.7	37
+Illinois	28.3	-2.1	32
+Indiana	29.4	-1.4	29
+Iowa	21.7	-5.7	39
+Kansas	31.9	-0.1	26
+Kentucky	35.9	2.2	18
+Louisiana	50.9	10.5	3
+Maine	16.8	-8.4	47
+Maryland	34.7	1.5	19
+Massachusetts	27.4	-2.6	34
+Michigan	21.7	-5.7	39
+Minnesota	12.4	-10.9	48
+Mississippi	46.7	8.2	6
+Missouri	32.3	0.2	24
+Montana	21.2	-6.0	41
+Nebraska	25.7	-3.5	36
+Nevada	32.2	0.1	25
+New Hampshire	21.1	-6.1	43
+New Jersey	33.0	0.6	21
+New Mexico	36.1	2.3	16
+New York	23.3	-4.8	38
+North Carolina	42.1	5.6	11
+North Dakota	12.2	-11.0	49
+Ohio	29.5	-1.4	28
+Oklahoma	39.1	3.9	13
+Oregon	34.0	1.1	20
+Pennsylvania	28.4	-2.0	31
+Rhode Island	31.4	-0.3	27
+South Carolina	46.1	7.8	9
+South Dakota	19.5	-6.9	44
+Tennessee	39.1	3.9	13
+Texas	47.9	8.8	4
+Utah	28.2	-2.1	33
+Vermont	19.4	-7.0	45
+Virginia	36.8	2.7	15
+Washington	33.0	0.6	21
+West Virginia	32.8	0.4	23
+Wisconsin	17.2	-8.2	46
+Wyoming	21.2	-6.0	41
+
