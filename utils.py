@@ -61,11 +61,11 @@ def plot_traffic_speed(df,df_weather,start,end,figsize = (10,3),ticks='1D'):
     plt.plot(df_filtered.groupby('Id').mean()['Speed_norm'],color='r')
 
 
-    for time in df_weather[df_weather['PRCP'] > 0.25].index.values:
-        plt.axvline(time,lw=1,c='0.8',ls='--')
+#     for time in df_weather[df_weather['PRCP'] > 0.25].index.values:
+#         plt.axvline(time,lw=1,c='0.8',ls='--')
 
-    for time in df_weather[df_weather['SNOW'] > 0.2].index.values:
-        plt.axvline(time,lw=1,c='r',ls='--')
+#     for time in df_weather[df_weather['SNOW'] > 0.2].index.values:
+#         plt.axvline(time,lw=1,c='r',ls='--')
 
 
     plt.xlim(pd.to_datetime(start),pd.to_datetime(end))
