@@ -30,7 +30,7 @@ def load_csv(path):
     
 #     return print('nothing')
 
-def plot_traffic_speed(df,df_weather,start,end,figsize = (10,3),ticks='1D'):
+def plot_traffic_speed(df,start,end,figsize = (10,3),ticks='1D'):
     
     '''plots and resamples'''
 
@@ -56,9 +56,6 @@ def plot_traffic_speed(df,df_weather,start,end,figsize = (10,3),ticks='1D'):
 
     df_rs = pd.concat(df_list, axis=1, ignore_index=False)
     df_rs.median(axis=1).plot(c='tab:orange')
-
-
-    plt.plot(df_filtered.groupby('Id').mean()['Speed_norm'],color='r')
 
 
 #     for time in df_weather[df_weather['PRCP'] > 0.25].index.values:
