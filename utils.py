@@ -25,7 +25,7 @@ def load_csv(path):
             df[cond]=np.nan
         df['Speed'] = df['Speed'].astype(float)
         df['DataAsOf'] = df['DataAsOf'].astype(str)
-        df = df[['Speed','DataAsOf','Id']]
+        df = df[['Speed','DataAsOf','linkId']]
         li.append(df)
 
 
@@ -71,6 +71,30 @@ def plot_traffic_speed(df,start,end,figsize = (10,3),ticks='1D'):
     plt.xlabel('Time')
     
     return df_rs
+
+def visualize_prediction(df,ticks,test_case,time,dense_no_weather,dense_weather,cond=0,width = 12):
+    
+    inds = test_case[(test_case['tp']>cond)].index
+    ind_0 = np.random.randint(0,len(inds)-1)
+    ind_0 = inds[ind_0]
+
+    plt.figure(dpi=300,figsize=[10,3])
+    plt.plot(time.loc[ind_0:ind_0+3*width],df.loc[ind_0:ind_0+3*width]['speed'].values,label='actual')
+
+    df_prec = df.loc[ind_0:ind_0+width].copy()
+    
+    prediction_no_weather = dense_no_weather.predict(df_prec.drop(['tp','sf'],axis=1))
+    prediction_weather = dense_weather.predict(df_prec)
+    
+    plt.plot(time.loc[ind_0+width:ind_0+2*width],prediction_no_weather,label='predicted (nwx)',c='0.5',lw=5,ls='-')
+    plt.plot(time.loc[ind_0+width:ind_0+2*width],prediction_weather,label='predicted (wx)',c='k',lw=5,ls='-')
+
+    plt.grid()
+    start = time.loc[ind_0]
+    end = time.loc[ind_0+3*width]
+    dates = pd.date_range(start=start,end=end,freq=ticks)
+    plt.xticks(ticks = dates,labels = dates,rotation=45,ha='right',size=10)
+    plt.legend()
 
 def train_test_val_split(df):
 
@@ -180,7 +204,7 @@ class WindowGenerator():
         return result
 
 
-def compile_and_fit(model, window, patience=2,MAX_EPOCHS = 20):
+def compile_and_fit(model, window, patience=1,MAX_EPOCHS = 20):
     
     
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
