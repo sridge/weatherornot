@@ -68,7 +68,7 @@ def resample_sensors(df):
 
     return df_rs
 
-def check_outages(df_rs,set_na=True):
+def nyc_median_speed(df_rs,set_na=True):
     """create an NYC median traffic speed index, setting times where
      >25% of traffic speed sensors aren't reporting data as np.NaN
 
@@ -97,7 +97,7 @@ def check_outages(df_rs,set_na=True):
 
     return cond_toss,speed_ts
 
-def clean(year = 2019,
+def clean_traffic(year = 2019,
     path = f'../nyc_speed_data/*{year}.csv',
     boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],
     window = '2H',freq = '15min',
@@ -107,10 +107,8 @@ def clean(year = 2019,
     
     df_rs = sample_sensors(df)
 
-    cond_toss,speed_ts = check_outages(df_rs)
+    cond_toss,speed_ts = nyc_median_speed(df_rs)
 
-
-
-    return df  
+    return speed_ts
 
 
