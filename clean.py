@@ -1,4 +1,7 @@
 import glob
+import urllib.parse
+
+import pytz
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -6,9 +9,23 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 import utils
 
-def subset_traffic_data(path,boro_sel,link_id_path='linkIds.csv'):
+def utc_to_local(utc_dt,local_tz):
+    
+    local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
+    return local_tz.normalize(local_dt)
+
+def four_hours_ago():
+
+    local_tz = pytz.timezone('US/Eastern')
+    current_time_utc = datetime.datetime.now()
+
+    current_time_et = utc_to_local(current_time_utc,local_tz)
+
+    return current_time_et - datetime.timedelta(hours=4)
+
+def subset_speed_data(path,boro_sel,link_id_path='linkIds.csv',live=False):
     """takes a subset of the NYC traffic speed sensor network, by 
-    borough andby average speed
+    borough and by average speed
 
     Args:
         path (str): path to the archived traffic speed data.s
@@ -28,10 +45,25 @@ def subset_traffic_data(path,boro_sel,link_id_path='linkIds.csv'):
     df_link = pd.read_csv('linkIds.csv')
     link_ids = df_link[df_link['borough'].isin(boro_sel)]['link_id'].unique()
 
-    # load the monthly traffic data files, dropping misformatted rows
-    df = utils.load_csv(path)
+
+    if live:
+
+        query = ('SELECT SPEED,LINK_ID,DATA_AS_OF ',
+            'WHERE DATA_AS_OF > \'2020-09-01\'')
+        query = urllib.parse.quote_plus(query)
+        query = '$query={query}'
+
+        base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
+        
+        df = pd.read_csv(base_url+query)
+        
+    else:
+        # load the monthly traffic data files, dropping misformatted rows
+        df = utils.load_csv(path)
+    
     df = df[df['linkId'].isin(link_ids)]
 
+    print('dropping na values, will take couple minutes')
     df = df.dropna()
     df['DataAsOf'] = pd.to_datetime(df['DataAsOf'])
 
@@ -40,6 +72,7 @@ def subset_traffic_data(path,boro_sel,link_id_path='linkIds.csv'):
     gt_20 = mean[mean['Speed']>20].index.astype(int)
 
     df = df[df['linkId'].isin(gt_20)]
+    print('done')
 
     return df
 
@@ -82,7 +115,7 @@ def nyc_median_speed(df_rs,set_na=True,n_sensors=152):
         sensors in the NYC sensor network
 
     Returns:
-        speed_ts (pandas.Series): timeseries of NYC median traffic 
+        median_speed (pandas.Series): timeseries of NYC median traffic 
         speed. Some timesteps set to np.NaN if set_na=True and >25% of 
         sensors are not reporting
         cond_toss (pandas.Series,bool): True where there are >25% of 
@@ -95,14 +128,14 @@ def nyc_median_speed(df_rs,set_na=True,n_sensors=152):
 
     cond_toss = sensor_outage>tol
 
-    speed_ts = df_rs.median(axis=1)
+    median_speed = df_rs.median(axis=1)
 
     if set_na:
-        speed_ts[cond_toss] = np.nan
+        median_speed[cond_toss] = np.nan
 
-    return cond_toss,speed_ts
+    return cond_toss,median_speed
 
-def clean_traffic(year = 2019,
+def clean_median_speed(year = 2019,
     path = '*',
     boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],
     window = '2H',freq = '15min',
@@ -111,13 +144,13 @@ def clean_traffic(year = 2019,
 
     path = f'{path}{year}.csv'
 
-    df = subset_traffic_data(path,boro_sel)
+    df = subset_speed_data(path,boro_sel)
     
-    cond_toss, df_rs = downsample_sensors(df)
+    df_rs = downsample_sensors(df,freq)
 
-    cond_toss,speed_ts = nyc_median_speed(df_rs)
+    cond_toss,median_speed = nyc_median_speed(df_rs)
 
-    return speed_ts
+    return median_speed
 
 def download_weather_data(year):
     """download hourly historical weather from the Central Park ASOS
@@ -157,6 +190,7 @@ def clean_weather(year,window,freq):
     df_weather = df_weather.dropna()
     df_weather_pred = df_weather_pred.dropna()
     
+    # duplicate values to match the 15min sampling frequency of
     df_weather = df_weather.resample(freq).pad()
     df_weather_pred = df_weather_pred.resample(freq).pad()
     
@@ -165,14 +199,14 @@ def clean_weather(year,window,freq):
     
     return df_weather
 
-def merge_data(df_weather,speed_ts):
+def merge_data(df_weather,median_speed):
     """merge the median NYC traffic speed data with weather data. Here
-    we also fill gaps <1H and mark where larger gaps remain.
+    gaps <1H are fill and larger gaps are identified.
 
     Args:
         df_weather (pandas.DataFrame): dataframe containing predicted 
         and observed weather
-        speed_ts (pandas.Series): timeseries of NYC median traffic 
+        median_speed (pandas.Series): timeseries of NYC median traffic 
         speed.
 
     Returns:
@@ -181,8 +215,8 @@ def merge_data(df_weather,speed_ts):
     """    
     
     df_merge = df_weather
-    df_merge['speed'] = speed_ts
-    df_merge = df_merge[df_merge.index.isin(speed_ts.index)]
+    df_merge['speed'] = median_speed
+    df_merge = df_merge[df_merge.index.isin(median_speed.index)]
     
     dhour = (df_merge.index.hour.values+df_merge.index.minute.values/60)
 
@@ -249,7 +283,7 @@ def split_into_segments(df_merge,freq,save=False):
 
         day = group[1]
         day['speed_diff'] = day['speed'].diff()
-        am_range,pm_range = build_am_pm_range(day)
+        am_range,pm_range = build_am_pm_range(day,freq)
 
         morning = day[day.index.isin(am_range)]
         afternoon = day[day.index.isin(pm_range)]
@@ -263,9 +297,9 @@ def split_into_segments(df_merge,freq,save=False):
     df_afternoon = pd.concat(afternoon_list, axis=0, ignore_index=False)
     
     if save:
-        morning_df.to_csv(f'morning_df_{year}.csv')
+        df_morning.to_csv(f'morning_df_{year}.csv')
         print('saved morning_df.csv')
-        afternoon_df.to_csv(f'afternoon_df_{year}.csv')
+        df_afternoon.to_csv(f'afternoon_df_{year}.csv')
         print('saved afternoon_df.csv')
         
     return df_morning,df_afternoon
