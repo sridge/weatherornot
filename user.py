@@ -1,15 +1,40 @@
 from email.message import EmailMessage
 import os
 import smtplib
-
 import ssl
+
+import numpy as np
 import pandas as pd
 
-# carriers = ['@txt.att.net','@vtext.com','@tmomail.net']
-# {'leave_nyc':'07','get_to_nyc':'07'}
+
+def add_user(number,carrier,enter_nyc,leave_nyc):
+
+    df_users = pd.read_csv('users.csv',index_column=0)
+
+    if ~(df_users['number']==number).any():
+
+        n = 8
+        uid = ''.join([str(np.random.randint(0, 9)) for _ in range(0, n)])
+        while (df_users.index==uid).any():
+            uid = ''.join([str(np.random.randint(0, 9)) for _ in range(0, n)])
+
+        df['uid'] = [uid]
+        df = df.set_index('uid')
+        df['email'] = [number+carrier]
+        df['enter_nyc'] = [enter_nyc]
+        df['leave_nyc'] = [leave_nyc]
+
+        df_users = df_users.append(df)
+        df_users.to_csv('users.csv')
+
+def remove_user(uid):
+
+    df_users = pd.read_csv('users.csv',index_column=0)
+    df_users = df_users[df_users.index != uid]
+    df_users.to_csv('users.csv')
 
 def send_alerts(
-    alert_thresh = 3,
+    hours,
     sender_email = 'smr1020@gmail.com',
     main_url = 'http://weatherornot.herokuapp.com',
     port = 465):
@@ -22,10 +47,6 @@ def send_alerts(
     context = ssl.create_default_context()
 
     df_users = pd.read_csv('users.csv',index_col=0)
-    # df_forecast = pd.read_csv('forecast.csv')
-
-    # hours = df_forecast['delta'][df_forecast['delta']>alert_thresh]['hour']
-    hours = [3,12,17]
 
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
 

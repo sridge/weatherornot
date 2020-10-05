@@ -1,5 +1,5 @@
 import glob
-import urllib.parse
+import datetime
 
 import pytz
 from tqdm import tqdm
@@ -46,20 +46,19 @@ def subset_speed_data(path,boro_sel,link_id_path='linkIds.csv',live=False):
     link_ids = df_link[df_link['borough'].isin(boro_sel)]['link_id'].unique()
 
 
-    if live:
+    # if live:
 
-        query = ('SELECT SPEED,LINK_ID,DATA_AS_OF ',
-            'WHERE DATA_AS_OF > \'2020-09-01\'')
-        query = urllib.parse.quote_plus(query)
-        query = '$query={query}'
+    #     query = ('SELECT SPEED,LINK_ID,DATA_AS_OF ',
+    #         'WHERE DATA_AS_OF > \'2020-09-01\'')
+    #     query = urllib.parse.quote_plus(query)
+    #     query = '$query={query}'
 
-        base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
+    #     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
         
-        df = pd.read_csv(base_url+query)
+    #     df = pd.read_csv(base_url+query)
         
-    else:
-        # load the monthly traffic data files, dropping misformatted rows
-        df = utils.load_csv(path)
+    # load the monthly traffic data files, dropping misformatted rows
+    df = utils.load_csv(path)
     
     df = df[df['linkId'].isin(link_ids)]
 
@@ -102,7 +101,7 @@ def downsample_sensors(df,freq):
 
     return df_rs
 
-def nyc_median_speed(df_rs,set_na=True,n_sensors=152):
+def nyc_median_speed(df_rs,set_na=True,n_sensors=153,frac=0.75):
     """create an NYC median traffic speed index, setting times where 
     >25% of traffic speed sensors aren't reporting data as np.NaN
 
@@ -111,8 +110,9 @@ def nyc_median_speed(df_rs,set_na=True,n_sensors=152):
         at all locations
         set_na (bool): Timesteps set to np.NaN if True 
         and >25% of sensors are not reporting
-        n_sensors (bool): set to the total number of traffic speed 
+        n_sensors (int): set to the total number of traffic speed 
         sensors in the NYC sensor network
+        frac (float): fraction of sensors needed to keep a data point
 
     Returns:
         median_speed (pandas.Series): timeseries of NYC median traffic 
@@ -124,7 +124,7 @@ def nyc_median_speed(df_rs,set_na=True,n_sensors=152):
     """ 
 
     sensor_outage = df_rs.isna().sum(axis=1)
-    tol = 153-(153*0.75)
+    tol = n_sensors-(n_sensors*0.75) # tolerance
 
     cond_toss = sensor_outage>tol
 
@@ -175,11 +175,24 @@ def clean_weather(year,window,freq):
     df_weather['p01i'][df_weather['p01i'] == 'T'] = 0.001
     df_weather['p01i'] = df_weather['p01i'].astype(float)
 
-    # set datetime index and make sure only these columns are in the data ['time','tmpf','dwpf','p01i']
+    # set datetime index and make sure only these columns are in the 
+    # data ['time','tmpf','p01i']
     df_weather['time'] = pd.to_datetime(df_weather['valid'])
     df_weather = df_weather[['time','p01i','tmpf']]
     df_weather['time'] = df_weather['time'] - pd.Timedelta('30min')
     df_weather = df_weather.set_index('time')
+
+    # create one timeseries for preciptiation when air temp < 32F and 
+    # another when air temp > 32F
+    df_weather['frz_prec'] = df_weather.pop('p01i')
+    df_weather['liq_prec'] = df_weather['frz_prec']
+
+    # when these conditions are true, set to zero
+    cond_frz = ((df_weather['tmpf']>0) & (df_weather['frz_prec'].notna()))
+    cond_liq = ((df_weather['tmpf']<0) & (df_weather['liq_prec'].notna()))
+
+    df_weather['frz_prec'][ cond_frz] = 0
+    df_weather['liq_prec'][cond_liq] = 0
 
     #get weather "forecast" by shifting time index
     df_weather_pred = df_weather
@@ -260,7 +273,7 @@ def build_am_pm_range(day,freq,am_start = 4,am_end = 12,pm_start = 12,pm_end = 2
     
     return am_range,pm_range
 
-def split_into_segments(df_merge,freq,save=False):
+def split_into_segments(df_merge,freq,year,save=False):
     """split the timeseries into morning and afternoon segments that
     contain no gaps. Add a feature including the first difference of 
     traffic speed.
