@@ -7,6 +7,7 @@ import pytz
 import tensorflow as tf
 
 def array_from_json(json_out,out_var):
+    
     arr_out = np.ones(len(json_out),dtype='object')
     for ind in range(0,len(arr_out)):
         arr_out[ind] = json_out[ind][out_var]['value']
