@@ -168,6 +168,8 @@ def download_weather_data(year):
     return df_weather
 
 def clean_weather(year,window,freq):
+    """Upsample hourly weather data to 15min intervals (padding), 
+    and feature for frozen precip"""
     
     df_weather = download_weather_data(year)
     
@@ -191,13 +193,12 @@ def clean_weather(year,window,freq):
     cond_frz = ((df_weather['tmpf']>0) & (df_weather['frz_prec'].notna()))
     cond_liq = ((df_weather['tmpf']<0) & (df_weather['liq_prec'].notna()))
 
-    df_weather['frz_prec'][ cond_frz] = 0
+    df_weather['frz_prec'][cond_frz] = 0
     df_weather['liq_prec'][cond_liq] = 0
 
     #get weather "forecast" by shifting time index
     df_weather_pred = df_weather
     df_weather_pred = df_weather_pred.set_index(df_weather.index - pd.Timedelta(window))
-    df_weather_pred = df_weather_pred.rename({'p01i': 'p01i_pred', 'tmpf': 'tmpf_pred'}, axis='columns')
 
     #drop na values
     df_weather = df_weather.dropna()
@@ -208,7 +209,8 @@ def clean_weather(year,window,freq):
     df_weather_pred = df_weather_pred.resample(freq).pad()
     
     df_weather['tmpf_pred'] = df_weather_pred['tmpf_pred']
-    df_weather['p01i_pred'] = df_weather_pred['p01i_pred']
+    df_weather['frz_prec_pred'] = df_weather_pred['frz_prec']
+    df_weather['liq_prec_pred'] = df_weather_pred['liq_prec']
     
     return df_weather
 
@@ -287,7 +289,6 @@ def split_into_segments(df_merge,freq,year,save=False):
 
     """ 
 
-    count = 0
     morning_list = []
     afternoon_list = []
 

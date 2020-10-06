@@ -6,7 +6,6 @@ import ssl
 import numpy as np
 import pandas as pd
 
-
 def add_user(number,carrier,enter_nyc,leave_nyc):
 
     df_users = pd.read_csv('users.csv',index_column=0)
