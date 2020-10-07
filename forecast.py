@@ -15,31 +15,6 @@ def array_from_json(json_out,out_var):
         arr_out[ind] = json_out[ind][out_var]['value']
     return arr_out
 
-# def forecast_date_range(delta = 24, hour_i_edt = 8, hour_f_edt = 2, hour_i_est = 9, hour_f_est = 3):
-
-#     tomorrow = datetime.now() + timedelta(hours=24)
-#     day_after = tomorrow + timedelta(hours=delta)
-
-#     day = tomorrow.day
-#     day_day_after = day_after.day
-#     month = tomorrow.month
-#     month_day_after = day_after.month
-#     year = tomorrow.year
-#     year_day_after = day_after.year
-
-
-#     if is_dst():
-#         hour_i = hour_i_edt
-#         hour_f = hour_f_edt
-#     else:
-#         hour_i = hour_i_est
-#         hour_f = hour_f_est
-
-#     start_time = f"{year}-{month:02}-{day:02}T{hour_i:02}:00:00Z"
-#     end_time = f"{year_day_after}-{month_day_after:02}-{day_day_after:02}T{hour_f:02}:00:00Z"
-
-#     return start_time,end_time
-
 def is_dst():
     """Determine whether or not Daylight Savings Time (DST)
     is currently in effect
@@ -89,9 +64,23 @@ def get_historical_weather(start_time,end_time,freq='15min',window='2h'):
         "fields":"precipitation,temp",
         "apikey":"XjiQRaTyQ1wANUsJNgF4PFSGLfs0VJ03"}
 
-    response = requests.request("GET", url, params=querystring)
+    response = requests.request("GET", base_url, params=querystring)
 
     return response.json()
+
+def get_weather_data(freq,end_time = '2020-10-07T16:30:00Z'):
+    # end_time = median_speed.index[-1].isoformat()
+
+    start_time = (pd.to_datetime(end_time)-pd.Timedelta('2H')).isoformat()
+    json_out = get_historical_weather(start_time=start_time,end_time=end_time)
+    df_weather = climacell_json_to_df(json_out,freq)
+
+    start_time = end_time
+    end_time = (pd.to_datetime(start_time)+pd.Timedelta('2.5H')).isoformat()
+    json_out = get_historical_weather(start_time=start_time,end_time=end_time)
+    df_weather_pred = climacell_json_to_df(json_out,freq)
+
+    return df_weather,df_weather_pred
 
 def climacell_json_to_df(json_out,freq):
 
@@ -109,35 +98,6 @@ def climacell_json_to_df(json_out,freq):
 
     return df_weather
 
-
-
-# def format_data_in_24h(df_merge,df_weather,df_weather_pred):
-
-#     freq = '15min'
-#     delta = 8
-
-#     hour_i_edt = 8
-#     hour_f_edt = 16
-#     hour_i_est = hour_i_edt+1
-#     hour_f_est = hour_i_edt+1
-
-#     start_time,end_time = forecast_date_range(delta=delta,
-#         hour_i_edt=hour_i_edt,
-#         hour_f_edt=hour_f_edt,
-#         hour_i_est=hour_i_est,
-#         hour_f_est=hour_f_est)
-
-#     forecast_time = pd.date_range(start=start_time,end=end_time,freq=freq)
-#     data_in = df_merge.set_index(forecast_time)
-
-#     df_weather_tem = df_weather[df_weather.index.isin(data_in.index)]
-#     df_weather_pred_tem = df_weather_pred[df_weather_pred.index.isin(data_in.index)]
-
-#     data_in['p01i'] = df_weather_tem['precipitation']**(1/3)
-#     data_in['p01i_pred'] = df_weather_pred_tem['precipitation']**(1/3)
-
-#     return data_in
-
 def format_data_in_2h(ampm,median_speed,df_weather,df_weather_pred):
 
     data_in = pd.DataFrame()
@@ -147,7 +107,7 @@ def format_data_in_2h(ampm,median_speed,df_weather,df_weather_pred):
     df_weather_tem = df_weather[df_weather.index.isin(data_in.index)]
     df_weather_pred_tem = df_weather_pred[df_weather_pred.index.isin(data_in.index)]
 
-    #create a feature for hour of day, normalize using sin
+    # create a feature for hour of day, normalize using sin
     data_in['hour'] = np.sin((dhour/24)*2*np.pi)
 
     data_in['speed_diff'] = data_in['speed'].diff()
@@ -157,17 +117,18 @@ def format_data_in_2h(ampm,median_speed,df_weather,df_weather_pred):
     # apply the same normalization applied to the training data
     mn = pd.read_csv(f'./forecast/mean_{ampm}.csv',index_col=0).T
     std = pd.read_csv(f'./forecast/std_{ampm}.csv',index_col=0).T
-
+    # some columns have a different normalization
     col_list = list(data_in.columns)
-
-    data_in = (data_in-mn[col_list])/std[col_list]
+    # use array broadcasting
+    data_in = data_in.sub(mn[col_list].iloc[0], axis='columns')
+    data_in = data_in.div(std[col_list].iloc[0], axis='columns')
 
     # weather is normalized differently
     data_in['p01i'] = df_weather_tem['precipitation']**(1/3)
     data_in['p01i_pred'] = df_weather_pred_tem['precipitation']**(1/3)
 
     # order columns like the training dataset
-    reorder_colums = ['p01i','tmpf','p01i_pred','speed',
+    reorder_colums = ['p01i','p01i_pred','speed',
         'hour','speed_diff','lt_32']
     
     data_in = data_in[reorder_colums]
@@ -178,21 +139,3 @@ def speed_forecast_2h(model_name,data_in):
 
     model = tf.keras.models.load_model(model_name)
     return model.predict(data_in.values[np.newaxis,])[0,:,1]
-
-def speed_forecast(data_in):
-
-    data_in = data_in.drop(['tmpf','tmpf_pred'],axis=1)
-    data_in = data_in.reset_index(drop=True)
-    speed_forecast = data_in['speed'].copy()
-    
-    model_name = 'weather_morning'
-    model = tf.keras.models.load_model(model_name)
-    
-    for ind in tqdm(range(0,24,8)):
-
-        pred = model.predict(data_in[ind:ind+8].values[np.newaxis,].astype(np.float32))[0,:,1]
-        data_in[ind+8:ind+16]['speed'] = pred
-        plt.plot(pred)
-
-    speed_forecast = data_in['speed']
-    return speed_forecast
