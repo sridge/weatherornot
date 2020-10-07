@@ -5,9 +5,11 @@ import numpy as np
 import pandas as pd
 import pytz
 import tensorflow as tf
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 def array_from_json(json_out,out_var):
-    
+
     arr_out = np.ones(len(json_out),dtype='object')
     for ind in range(0,len(arr_out)):
         arr_out[ind] = json_out[ind][out_var]['value']
@@ -51,11 +53,11 @@ def is_dst():
     # if DST is in effect, their offsets will be different
     return not (y.utcoffset() == x.utcoffset())
 
-def get_weather_forecast(freq='15min',window='2H'):
+def get_weather_forecast(start_time, end_time, freq='15min', window='2H'):
 
     base_url = "https://api.climacell.co/v3/weather/forecast/hourly"
 
-    start_time,end_time = forecast_date_range()
+    # start_time,end_time = forecast_date_range()
 
     querystring = {"lat":"40.7812","lon":"-73.9665",
         "unit_system":"us",
@@ -65,7 +67,10 @@ def get_weather_forecast(freq='15min',window='2H'):
         "apikey":"XjiQRaTyQ1wANUsJNgF4PFSGLfs0VJ03"}
 
     response = requests.request("GET", base_url, params=querystring)
-    json_out = response.json()
+
+    return response.json()
+
+def climacell_json_to_df(json_out,freq):
 
     df_weather = pd.DataFrame()
     out_vars = ['temp','precipitation','observation_time']
@@ -79,10 +84,32 @@ def get_weather_forecast(freq='15min',window='2H'):
 
     df_weather = df_weather.resample(freq).pad()
 
-    df_weather_pred = df_weather
-    df_weather_pred = df_weather_pred.set_index(df_weather.index - pd.Timedelta(window))
+    return df_weather
 
-    return df_weather,df_weather_pred
+def synthetic_weather_forecast(df_weather):
+
+        df_weather_pred = df_weather
+        df_weather_pred = df_weather_pred.set_index(df_weather.index - pd.Timedelta(window))
+
+        return df_weather_pred
+
+def get_historical_weather(start_time,end_time,freq='15min',window='2h'):
+    
+    url = "https://api.climacell.co/v3/weather/historical/climacell"
+
+    querystring = {"lat":"40.7812","lon":"-73.9665",
+        "timestep":"60",
+        "unit_system":"us",
+        "start_time":start_time,
+        "end_time":end_time,
+        # "start_time":"2020-10-07T14:09:50Z",
+        # "end_time":"now",
+        "fields":"precipitation,temp",
+        "apikey":"XjiQRaTyQ1wANUsJNgF4PFSGLfs0VJ03"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    return response.json()
 
 
 def generate_data_in(df_merge,df_weather,df_weather_pred):
@@ -113,19 +140,53 @@ def generate_data_in(df_merge,df_weather,df_weather_pred):
 
     return data_in
 
-def forecast_2h(model_name,data_in):
+def generate_data_in(df_merge,df_weather,df_weather_pred):
+
+    freq = '15min'
+    delta = 8
+
+    hour_i_edt = 8
+    hour_f_edt = 16
+    hour_i_est = hour_i_edt+1
+    hour_f_est = hour_i_edt+1
+
+    start_time,end_time = forecast_date_range(delta=delta,
+        hour_i_edt=hour_i_edt,
+        hour_f_edt=hour_f_edt,
+        hour_i_est=hour_i_est,
+        hour_f_est=hour_f_est)
+
+
+    forecast_time = pd.date_range(start=start_time,end=end_time,freq=freq)
+    data_in = df_merge.set_index(forecast_time)
+
+    df_weather_tem = df_weather[df_weather.index.isin(data_in.index)]
+    df_weather_pred_tem = df_weather_pred[df_weather_pred.index.isin(data_in.index)]
+
+    data_in['p01i'] = df_weather_tem['precipitation']**(1/3)
+    data_in['p01i_pred'] = df_weather_pred_tem['precipitation']**(1/3)
+
+    return data_in
+
+def speed_forecast_2h(model_name,data_in):
 
     model = tf.keras.models.load_model(model_name)
-    return model.predict(data_in)
+    return model.predict(data_in.values[np.newaxis,])[0,:,1]
 
-def forecast_24h(data_in):
+def speed_forecast(data_in):
 
-    for ind in range(8,72,8):
+    data_in = data_in.drop(['tmpf','tmpf_pred'],axis=1)
+    data_in = data_in.reset_index(drop=True)
+    speed_forecast = data_in['speed'].copy()
+    
+    model_name = 'weather_morning'
+    model = tf.keras.models.load_model(model_name)
+    
+    for ind in tqdm(range(0,24,8)):
 
-        if ind < 32:
-            ampm = 'am'
-            pred = forecast_2h(model_name=f'weather_{ampm}', data_in = data_in[ind-8:ind])
+        pred = model.predict(data_in[ind:ind+8].values[np.newaxis,].astype(np.float32))[0,:,1]
+        data_in[ind+8:ind+16]['speed'] = pred
+        plt.plot(pred)
 
-        if ind > 32:
-            ampm = 'pm'
-            pred = forecast_2h(model_name=f'weather_{ampm}', data_in = data_in[ind-8:ind])
+    speed_forecast = data_in['speed']
+    return speed_forecast
