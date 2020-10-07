@@ -49,7 +49,7 @@ def load_speed_from_csv(path):
 def load_speed_from_api():
 
     #SQL query
-    query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20>%20%272020-01-01%27%20'
+    query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20<%20%272020-01-01%27%20'
     # query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
     #     'WHERE DATA_AS_OF > \'2020-09-01\'')
     # print(query)

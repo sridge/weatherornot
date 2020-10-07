@@ -28,6 +28,18 @@ def is_dst():
     # if DST is in effect, their offsets will be different
     return not (y.utcoffset() == x.utcoffset())
 
+def time_nearest_15min():
+    now = datetime.datetime.now()
+
+    year = now.year
+    month = now.month
+    day = now.day
+    hour = now.hour
+    minute = now.minute
+    minute = minute - minute%15
+
+    return f'{year}-{month:02}-{day:02}T{hour:02}:{minute:02}:00Z'
+
 def get_weather_forecast(start_time, end_time, freq='15min', window='2H'):
 
     base_url = "https://api.climacell.co/v3/weather/forecast/hourly"
