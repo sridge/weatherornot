@@ -1,6 +1,6 @@
 fastapi==0.61.1
 Flask==1.1.2
-matplotlib=3.3.2
+matplotlib==3.3.2
 numpy==1.18.5
 pandas==1.0.5
 pandas-market-calendars==1.6.0
