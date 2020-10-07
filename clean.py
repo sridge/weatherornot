@@ -1,5 +1,7 @@
-import glob
 import datetime
+import glob
+import urllib
+
 
 import pytz
 from tqdm import tqdm
@@ -7,7 +9,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 import scipy.stats as stats
-import utils
 
 def utc_to_local(utc_dt,local_tz):
     
@@ -23,15 +24,51 @@ def four_hours_ago():
 
     return current_time_et - datetime.timedelta(hours=4)
 
-def subset_speed_data(path,boro_sel,link_id_path='linkIds.csv',live=False):
+def load_speed_from_csv(path):
+    
+    '''minor cleaning and concatenates csv files'''
+    
+    all_files = glob.glob(path)
+
+    li = []
+
+    for filename in tqdm(all_files):
+        df = pd.read_csv(filename, index_col=None, header=0)
+        df.columns = ['Id', 'Speed', 'TravelTime', 'Status', 'DataAsOf', 'linkId']
+        if df['Speed'].dtype != np.float64:
+            cond = ((df['Speed'].str.contains('Speed')) | (df['Speed'].str.contains('Bronx')))
+            df[cond]=np.nan
+        df['Speed'] = df['Speed'].astype(float)
+        df['DataAsOf'] = df['DataAsOf'].astype(str)
+        df = df[['Speed','DataAsOf','linkId']]
+        li.append(df)
+
+
+    return pd.concat(li, axis=0, ignore_index=True)
+
+def load_speed_from_api():
+
+    #SQL query
+    query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20>%20%272020-01-01%27%20'
+    # query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
+    #     'WHERE DATA_AS_OF > \'2020-09-01\'')
+    # print(query)
+    # query = urllib.parse.quote_plus(query)
+    query = '$query={query}'
+
+    base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
+    
+    return pd.read_csv('https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T03:59:00.000%27%20%20LIMIT%2010000')
+
+def subset_speed_data(df,boro_sel,link_id_path='linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
     borough and by average speed
 
     Args:
-        path (str): path to the archived traffic speed data.s
+        path (str): path to the archived traffic speed data
         boro_sel (str): the boroughs that we want to include in our 
         analysis.
-        link_id_path (str): path to csv containing 
+        link_id_path (str): path to csv containing road segment IDs 
 
     Returns:
         df (pandas.DataFrame): dataframe containing NYC traffic speed 
@@ -44,25 +81,10 @@ def subset_speed_data(path,boro_sel,link_id_path='linkIds.csv',live=False):
     # select linkIds that are in the boroughs you're interested in
     df_link = pd.read_csv('linkIds.csv')
     link_ids = df_link[df_link['borough'].isin(boro_sel)]['link_id'].unique()
-
-
-    # if live:
-
-    #     query = ('SELECT SPEED,LINK_ID,DATA_AS_OF ',
-    #         'WHERE DATA_AS_OF > \'2020-09-01\'')
-    #     query = urllib.parse.quote_plus(query)
-    #     query = '$query={query}'
-
-    #     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
-        
-    #     df = pd.read_csv(base_url+query)
-        
-    # load the monthly traffic data files, dropping misformatted rows
-    df = utils.load_csv(path)
     
     df = df[df['linkId'].isin(link_ids)]
 
-    print('dropping na values, will take couple minutes')
+    print('dropping na values, will take a couple minutes')
     df = df.dropna()
     df['DataAsOf'] = pd.to_datetime(df['DataAsOf'])
 
@@ -142,7 +164,7 @@ def clean_median_speed(year = 2019,
     ):
     """create a clean NYC median traffic speed timeseries"""
 
-    path = f'{path}{year}.csv'
+    path = f'../nyc_speed_data/{path}{year}.csv'
 
     df = subset_speed_data(path,boro_sel)
     
@@ -190,8 +212,8 @@ def clean_weather(year,window,freq):
     df_weather['liq_prec'] = df_weather['frz_prec']
 
     # when these conditions are true, set to zero
-    cond_frz = ((df_weather['tmpf']>0) & (df_weather['frz_prec'].notna()))
-    cond_liq = ((df_weather['tmpf']<0) & (df_weather['liq_prec'].notna()))
+    cond_frz = ((df_weather['tmpf']>32) & (df_weather['frz_prec'].notna()))
+    cond_liq = ((df_weather['tmpf']<32) & (df_weather['liq_prec'].notna()))
 
     df_weather['frz_prec'][cond_frz] = 0
     df_weather['liq_prec'][cond_liq] = 0
@@ -208,7 +230,6 @@ def clean_weather(year,window,freq):
     df_weather = df_weather.resample(freq).pad()
     df_weather_pred = df_weather_pred.resample(freq).pad()
     
-    df_weather['tmpf_pred'] = df_weather_pred['tmpf_pred']
     df_weather['frz_prec_pred'] = df_weather_pred['frz_prec']
     df_weather['liq_prec_pred'] = df_weather_pred['liq_prec']
     
