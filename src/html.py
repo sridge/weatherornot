@@ -16,5 +16,3 @@ def form_post(request: Request):
 def form_post(request: Request, number: int = Form(...),carrier: str = Form(...), enter_nyc: int = Form(...), leave_nyc: int = Form(...)):
     result = add_user(number,carrier,enter_nyc,leave_nyc)
     return templates.TemplateResponse('forecast.html', context={'request': request, 'result': result})
-
-
