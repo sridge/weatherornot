@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+import forecast
 
 from src.user import add_user
 
@@ -11,6 +12,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get('/forecast')
 def form_post(request: Request):
+    forecast.run_forecast_system()
     result = 'Type your phone number'
     return templates.TemplateResponse('forecast.html', context={'request': request, 'result': result})
 
