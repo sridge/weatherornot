@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 # from twilio.rest import Client
 
-
 def add_user(number,carrier,enter_nyc,leave_nyc):
 
-    df_users = pd.read_csv('users.csv',index_column=0)
+    df_users = pd.read_csv('./data/users.csv',index_col=0)
+    email = (str(number)+carrier)
 
-    if ~(df_users['number']==number).any():
-
+    if ~(df_users['email']==email).any():
+        df = pd.DataFrame()
         n = 8
         uid = ''.join([str(np.random.randint(0, 9)) for _ in range(0, n)])
         while (df_users.index==uid).any():
@@ -21,22 +21,27 @@ def add_user(number,carrier,enter_nyc,leave_nyc):
 
         df['uid'] = [uid]
         df = df.set_index('uid')
-        df['email'] = [number+carrier]
+        df['email'] = [email]
         df['enter_nyc'] = [enter_nyc]
         df['leave_nyc'] = [leave_nyc]
 
         df_users = df_users.append(df)
-        df_users.to_csv('users.csv')
+        df_users.to_csv('./data/users.csv')
+
+        return 'Success! You\'re now enrolled in text alerts'
+
+    else:
+        return 'This number is already enrolled in text alerts'
 
 def remove_user(uid):
 
     df_users = pd.read_csv('users.csv',index_column=0)
     df_users = df_users[df_users.index != uid]
-    df_users.to_csv('users.csv')
+    df_users.to_csv('./data/users.csv')
 
 def send_alerts(hours,
     sender_email = 'smr1020@gmail.com',
-    main_url = 'http://weatherornot.herokuapp.com',
+    main_url = 'http://weatherornotapi.herokuapp.com',
     port = 465):
 
     forecast_link = f'{main_url}/forecast'

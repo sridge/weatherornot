@@ -16,6 +16,7 @@ def array_from_json(json_out,out_var):
     return arr_out
 
 def is_dst():
+    
     """Determine whether or not Daylight Savings Time (DST)
     is currently in effect
 
@@ -29,6 +30,7 @@ def is_dst():
     return not (y.utcoffset() == x.utcoffset())
 
 def time_nearest_15min():
+
     now = datetime.datetime.now()
 
     year = now.year

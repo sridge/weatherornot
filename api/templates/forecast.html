@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+    <title>Weather or Not Forecast</title>
+</head>
+<body>
+<form class="pure-form-aligned">
+    <fieldset>
+
+        <legend>Register for SMS alerts</legend>
+
+        <div class="pure-control-group">
+            <label for="number">Phone Number</label>
+            <input type="tel" name="number" id="number" pattern="[0-9]{10}", placeholder="1234567890" required>
+            
+            <label for="carrier">Carrier</label>
+            <select name="carrier" id="carrier" required>
+                <option value="@txt.att.net">AT&T</option>
+                <option value="@vtext.com">Verizon</option>
+                <option value="@tmomail.net">T-Mobile</option>
+                <option value="@messaging.sprintpcs.com">Sprint</option>
+                <option value="@mms.uscc.net">US Cellular</option>
+            </select>
+        </div>
+
+        <div class="pure-control-group">
+            <label for="enter_nyc">What time do you normally arrive leave your workplace?</label>
+            <input type="number" name="leave_nyc" value="{{ leave_nyc }}" required/>
+        </div>
+
+        <div class="pure-control-group">
+            <label for="enter_nyc">What time do you normally arrive leave your workplace?</label>
+            <input type="number" name="leave_nyc" value="{{ leave_nyc }}" required/>
+            <button type="submit" class="pure-button pure-button-primary">Register</button>
+        </div>
+
+    </fieldset>
+</form>
+<p>{{ result }}</p>
+</body>
+</html>
