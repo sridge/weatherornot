@@ -119,7 +119,7 @@ def climacell_json_to_df(json_out,freq):
 
     return df_weather
 
-def normalize(data_in):
+def normalize(ampm,data_in):
     
     # apply the same normalization applied to the training data
     mn = pd.read_csv(f'./forecast/mean_{ampm}.csv',index_col=0).T
@@ -324,7 +324,7 @@ def send_alerts(hours,
                 print(message)
                 server.send_message(em)
 
-def run_forecast_sytem():
+def run_forecast_system():
 
     df_forecast = speed_forecast_2h()
     hours = alert_hours(df_forecast,thresh=0)

@@ -1,12 +1,12 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
-import forecast
+from forecast import run_forecast_system
 
 sched = BlockingScheduler()
 
 @sched.scheduled_job('interval', minutes=3)
 def timed_job():
     print('forecast starting')
-    forecast.run_forecast_sytem()
+    run_forecast_system()
     print('forecast finished')
     
 
