@@ -207,7 +207,7 @@ def save_forecast_image(median_speed,df_forecast):
     # Only show ticks on the left and bottom spines
     ax.yaxis.set_ticks_position('none')
     ax.xaxis.set_ticks_position('bottom')
-    plt.savefig('../static/forecast.png')
+    plt.savefig('./static/forecast.png')
 
 def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],freq = '15min'):
     
