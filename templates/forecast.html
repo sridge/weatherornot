@@ -7,7 +7,7 @@
     <title>Weather or Not Forecast</title>
 </head>
 <body>
-<img src="../forecast/forecast.png" width="500" class="center">
+<img class="pure-img" src="/static/forecast.png">
 <form class="pure-form-aligned">
     <fieldset>
 
@@ -15,7 +15,7 @@
 
         <div class="pure-control-group">
             <label for="number">Phone Number</label>
-            <input type="tel" name="number" id="number" pattern="[0-9]{10}", placeholder="1234567890" required>
+            <input type="tel" name="number" id="number" pattern="[0-9]{10}" placeholder="1234567890" required>
             
             <label for="carrier">Carrier</label>
             <select name="carrier" id="carrier" required>
@@ -29,17 +29,18 @@
 
         <div class="pure-control-group">
             <label for="enter_nyc">What time do you normally arrive at your workplace?</label>
-            <input type="number" name="leave_nyc" value="{{ leave_nyc }}" required/>
+            <input type="number" name="leave_nyc" placeholder="9" value="{{ leave_nyc }}" required/>
         </div>
 
         <div class="pure-control-group">
             <label for="enter_nyc">What time do you normally leave from your workplace?</label>
-            <input type="number" name="leave_nyc" value="{{ leave_nyc }}" required/>
-            <button type="submit" class="pure-button pure-button-primary">Register</button>
+            <input type="number" name="leave_nyc" placeholder="17" value="{{ leave_nyc }}" required/>
         </div>
+
+        <button type="submit" class="pure-button pure-button-primary">Register</button>
 
     </fieldset>
 </form>
-<p>{{ result }}</p>
+<p>Status: {{ result }}</p>
 </body>
 </html>

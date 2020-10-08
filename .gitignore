@@ -99,3 +99,10 @@ src/__pycache__/html.cpython-38.pyc
 src/__pycache__/model.cpython-38.pyc
 src/__pycache__/rest.cpython-38.pyc
 src/__pycache__/user.cpython-38.pyc
+forecast/.ipynb_checkpoints/clean-checkpoint.py
+forecast/.ipynb_checkpoints/forecast-checkpoint.py
+forecast/.ipynb_checkpoints/test_api-checkpoint.ipynb
+forecast/__pycache__/clean.cpython-38.pyc
+forecast/__pycache__/forecast.cpython-38.pyc
+src/.ipynb_checkpoints/user-checkpoint.py
+templates/.forecast.html.swp
