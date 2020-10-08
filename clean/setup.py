@@ -1,3 +1,11 @@
-import setuptools
+from setuptools import setup
 
-setuptools.setup(name="clean",version="0.0.1")
+setup(name='clean',
+      version='0.1',
+      description='clean-data',
+      url='http://github.com/sridge/weatherornot',
+      author='Sean Ridge',
+      author_email='smr1020@example.com',
+      license='MIT',
+      packages=['clean'],
+      zip_safe=False)
