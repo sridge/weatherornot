@@ -79,7 +79,7 @@ def subset_speed_data(df,boro_sel,link_id_path='./weatherornot/forecast/linkIds.
 
     # each sensor has a corresponding linkId which indicates what road segment it monitors
     # select linkIds that are in the boroughs you're interested in
-    df_link = pd.read_csv('linkIds.csv')
+    df_link = pd.read_csv(link_id_path)
     link_ids = df_link[df_link['borough'].isin(boro_sel)]['link_id'].unique()
     
     df = df[df['linkId'].isin(link_ids)]
