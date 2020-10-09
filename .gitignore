@@ -6,9 +6,6 @@ afternoon_df_2019.csv
 df_norm_2019.csv
 df_norm_2018.csv
 df_norm.csv
-linkIds.csv
-mean_afternoon.csv
-mean_morning.csv
 mean.csv
 means_{year}.csv
 means_2016.csv
@@ -27,8 +24,6 @@ traffic_data_clean_2017.csv
 traffic_data_clean_2018.csv
 traffic_data_clean_2019.csv
 traffic_data_clean.csv
-std_afternoon.csv
-std_morning.csv
 std.csv
 df_norm.csv
 wget-log
@@ -106,3 +101,17 @@ forecast/__pycache__/clean.cpython-38.pyc
 forecast/__pycache__/forecast.cpython-38.pyc
 src/.ipynb_checkpoints/user-checkpoint.py
 templates/.forecast.html.swp
+clean/clean/__pycache__/__init__.cpython-38.pyc
+clean/clean.egg-info/dependency_links.txt
+clean/clean.egg-info/not-zip-safe
+clean/clean.egg-info/PKG-INFO
+clean/clean.egg-info/SOURCES.txt
+clean/clean.egg-info/top_level.txt
+clean/dist/clean-0.0.1-py3.8.egg
+clean/dist/clean-0.1-py3.8.egg
+forecast/dist/forecast-0.1-py3.8.egg
+forecast/forecast.egg-info/dependency_links.txt
+forecast/forecast.egg-info/not-zip-safe
+forecast/forecast.egg-info/PKG-INFO
+forecast/forecast.egg-info/SOURCES.txt
+forecast/forecast.egg-info/top_level.txt
