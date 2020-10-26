@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='forecast',
-      version='0.2',
+      version='0.3',
       description='make a forecast',
       url='http://github.com/sridge/weatherornot',
       author='Sean Ridge',
