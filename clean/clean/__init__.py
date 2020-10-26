@@ -56,7 +56,7 @@ def load_speed_from_api():
     #     'WHERE DATA_AS_OF > \'2020-09-01\'')
     # print(query)
     # query = urllib.parse.quote_plus(query)
-    query = '$query={query}'
+    query = f'$query={query}'
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
     current_time_utc = datetime.datetime.utcnow()

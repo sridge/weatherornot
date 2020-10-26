@@ -283,6 +283,7 @@ def send_alerts(hours,
     sender_email = 'smr1020@gmail.com',
     main_url = 'http://weatherornotapi.herokuapp.com',
     port = 465):
+    os.chdir('/app')
 
     forecast_link = f'{main_url}/forecast'
 
@@ -291,7 +292,7 @@ def send_alerts(hours,
     # Create a secure SSL context
     context = ssl.create_default_context()
 
-    df_users = pd.read_csv('/data/users.csv',index_col=0)
+    df_users = pd.read_csv('./data/users.csv',index_col=0)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
 
