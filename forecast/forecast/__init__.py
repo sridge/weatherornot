@@ -122,8 +122,8 @@ def climacell_json_to_df(json_out,freq):
 def normalize(ampm,data_in):
     
     # apply the same normalization applied to the training data
-    mn = pd.read_csv(f'./weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
-    std = pd.read_csv(f'./weatherornot/forecast/std_{ampm}.csv',index_col=0).T
+    mn = pd.read_csv(f'/weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
+    std = pd.read_csv(f'/weatherornot/forecast/std_{ampm}.csv',index_col=0).T
     # some columns have a different normalization
     col_list = list(data_in.columns)
     # use array broadcasting
@@ -135,8 +135,8 @@ def normalize(ampm,data_in):
 def denormalize_speed(ampm,df_forecast):
     
     # apply the same normalization applied to the training data
-    mn = pd.read_csv(f'./weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
-    std = pd.read_csv(f'./weatherornot/forecast/std_{ampm}.csv',index_col=0).T
+    mn = pd.read_csv(f'/weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
+    std = pd.read_csv(f'/weatherornot/forecast/std_{ampm}.csv',index_col=0).T
     # use array broadcasting
     df_forecast = df_forecast.mul(std['speed'].iloc[0], axis='columns')
     df_forecast = df_forecast.add(mn['speed'].iloc[0], axis='columns')
@@ -168,8 +168,8 @@ def format_data_in_2h(median_speed,df_weather,df_weather_pred):
     data_in['lt_32'] = (df_weather_tem['temp'] < 32).astype(int)
 
     # apply the same normalization applied to the training data
-    mn = pd.read_csv(f'./weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
-    std = pd.read_csv(f'./weatherornot/forecast/std_{ampm}.csv',index_col=0).T
+    mn = pd.read_csv(f'/weatherornot/forecast/mean_{ampm}.csv',index_col=0).T
+    std = pd.read_csv(f'/weatherornot/forecast/std_{ampm}.csv',index_col=0).T
     # some columns have a different normalization
     col_list = list(data_in.columns)
     # use array broadcasting
@@ -214,7 +214,7 @@ def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','
     # currently pulling from archive because the system isn't reporting live speed anymore
     df = clean.load_speed_from_api()
     df = df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
-    df = clean.subset_speed_data(df,boro_sel,link_id_path='./weatherornot/forecast/linkIds.csv')
+    df = clean.subset_speed_data(df,boro_sel,link_id_path='/weatherornot/forecast/linkIds.csv')
     df_rs = clean.downsample_sensors(df,freq)
 
     _,median_speed = clean.nyc_median_speed(df_rs)
@@ -291,7 +291,7 @@ def send_alerts(hours,
     # Create a secure SSL context
     context = ssl.create_default_context()
 
-    df_users = pd.read_csv('./data/users.csv',index_col=0)
+    df_users = pd.read_csv('/data/users.csv',index_col=0)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
 
