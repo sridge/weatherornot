@@ -7,7 +7,7 @@ import os
 @sched.scheduled_job('interval', minutes=3)
 def timed_job():
     print('forecast starting')
-    print(os.getcwd())
+    print(os.listdir())
     print('forecast finished')
     
 
