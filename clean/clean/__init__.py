@@ -18,7 +18,7 @@ def utc_to_local(utc_dt,local_tz):
 def four_hours_ago():
 
     local_tz = pytz.timezone('US/Eastern')
-    current_time_utc = datetime.datetime.now()
+    current_time_utc = datetime.datetime.utcnow()
 
     current_time_et = utc_to_local(current_time_utc,local_tz)
 
@@ -59,8 +59,8 @@ def load_speed_from_api():
     query = '$query={query}'
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
-    current_time_utc = datetime.datetime.now()
-    hour = current_time_utc.hour - 6
+    current_time_utc = datetime.datetime.utcnow()
+    hour = current_time_utc.hour - 9
     minute = current_time_utc.minute
     return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
 
