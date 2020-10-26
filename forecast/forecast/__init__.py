@@ -242,14 +242,14 @@ def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','
     data_in = data_in.astype('float32')
     data_in = data_in.fillna(method='bfill')
 
-    model_name=f'weather_{ampm}'
+    model_name=f'./forecast/weather_{ampm}'
     model = tf.keras.models.load_model(f'{model_name}')
     weather = model.predict(data_in.values[np.newaxis,])[0,:,1]
 
     weather = pd.Series(weather)
     weather.index = data_in.index + pd.Timedelta('2H')
 
-    model_name=f'no_weather_{ampm}'
+    model_name=f'./forecast/no_weather_{ampm}'
     model = tf.keras.models.load_model(f'{model_name}')
     data_in = data_in.drop(['p01i','p01i_pred','lt_32'],axis=1)
     no_weather = model.predict(data_in.values[np.newaxis,])[0,:,1]
