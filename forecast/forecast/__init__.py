@@ -189,7 +189,7 @@ def format_data_in_2h(median_speed,df_weather,df_weather_pred):
     return ampm,data_in
 
 def save_forecast_image(median_speed,df_forecast):
-
+    os.chdir('/app')
     fig = plt.figure(dpi=300)
     plt.title('Live Traffic Forecast')
     median_speed.tz_convert('US/Eastern').plot(label='Past Traffic')
@@ -210,7 +210,7 @@ def save_forecast_image(median_speed,df_forecast):
     plt.savefig('./static/forecast.png')
 
 def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],freq = '15min'):
-    
+    os.chdir('/app')
     # currently pulling from archive because the system isn't reporting live speed anymore
     df = clean.load_speed_from_api()
     df = df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
