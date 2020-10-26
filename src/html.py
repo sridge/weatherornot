@@ -4,6 +4,9 @@ from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.user import add_user
+import forecast
+
+forecast.run_forecast_system()
 
 app = FastAPI()
 templates = Jinja2Templates(directory='templates/')
