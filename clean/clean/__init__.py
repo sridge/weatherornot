@@ -49,7 +49,9 @@ def load_speed_from_csv(path):
 def load_speed_from_api():
 
     #SQL query
-    query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20<%20%272020-01-01%27%20'
+    # query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20<%20%272020-01-01%27%20'
+    query = ('SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF'
+             '%20BETWEEN%20%272020-01-01T00:00:00%27%20AND%20%272020-01-02T00:00:00%27%20')
     # query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
     #     'WHERE DATA_AS_OF > \'2020-09-01\'')
     # print(query)
@@ -58,7 +60,8 @@ def load_speed_from_api():
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
     
-    return pd.read_csv('https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T03:59:00.000%27%20%20LIMIT%2010000')
+    return pd.read_csv('https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20BETWEEN%20%272020-01-01T00:00:00%27%20AND%20%272020-01-02T00:00:00%27%20')
+    # return pd.read_csv('https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T03:59:00.000%27%20%20LIMIT%2010000')
 
 def subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
