@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='clean',
-      version='0.2',
+      version='0.3',
       description='clean-data',
       url='http://github.com/sridge/weatherornot',
       author='Sean Ridge',
