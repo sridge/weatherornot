@@ -62,7 +62,7 @@ def load_speed_from_api():
     current_time_utc = datetime.datetime.utcnow()
     hour = current_time_utc.hour - 9
     minute = current_time_utc.minute
-    return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
+    return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T03:59:00.000%27%20%20LIMIT%2010000')
 
 def subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
