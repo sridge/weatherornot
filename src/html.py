@@ -15,6 +15,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get('/forecast')
 def form_post(request: Request):
     result = 'Type your phone number'
+    app.mount("/static", StaticFiles(directory="static"), name="static")
     return templates.TemplateResponse('forecast.html', context={'request': request, 'result': result})
 
 @app.post('/forecast')
