@@ -25,9 +25,6 @@ COPY . .
 # install project requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
-# set work directory
-WORKDIR /src/
-
 # set app port
 EXPOSE 5000 
 
