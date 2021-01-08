@@ -17,24 +17,19 @@ RUN apt-get update \
 RUN pip install --no-cache-dir --upgrade pip
 
 # set work directory
-WORKDIR /src/app
-
-# copy requirements.txt
-COPY ./requirements.txt /src/app/requirements.txt
-
-# install project requirements
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /
 
 # copy all files to home of container filesystem 
 COPY . .
+
+# install project requirements
+RUN pip install --no-cache-dir -r requirements.txt
 
 # set work directory
 WORKDIR /src/
 
 # set app port
-EXPOSE 5000
-
-ENTRYPOINT [ "python" ] 
+EXPOSE 5000 
 
 # Run src.html when the container launches
 CMD ["uvicorn", "src.html:app", "--host=0.0.0.0", "--port=5000"]
