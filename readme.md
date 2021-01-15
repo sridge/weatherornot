@@ -1,5 +1,5 @@
 # Weather or Not
-Weather or Not is a service that provides live forecast of the impact of weather on New York City traffic. Currently hosted on Heroku (free) but also can be deployed on an AWS instance using the included dockerfile. NOTE: NYC's datafeed is currently unreliable so the data is stale
+Weather or Not is a service that provides live forecast of the impact of weather on New York City traffic. Currently hosted on Heroku (free) but also can be deployed on an AWS instance using the included dockerfile. 
 
 ## Organization
 #### forecast: 
