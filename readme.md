@@ -13,7 +13,7 @@ FastAPI code that serves the html signup portal
 #### templates: 
 Jinja templates
 #### static: 
-forecast image
+forecast image updated by the forecast system
 #### data: 
 contains the users who are currently signed up for alerts
 
