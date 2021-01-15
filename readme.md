@@ -3,7 +3,7 @@ Weather or Not is a service that provides live forecast of the impact of weather
 
 ## Organization
 #### forecast: 
-Python module that runs the forecast system in the background
+Python module for the forecast system. Advanced Python Scheduler is used to run it in the background
 #### clean: 
 Python module for cleaning New York City's traffic data that is ingested by the forecast system
 #### notebooks:
