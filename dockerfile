@@ -25,6 +25,9 @@ COPY . .
 # install project requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
+# start the scheduled forecast system background process
+RUN python clock.py
+
 # set app port
 EXPOSE 5000 
 

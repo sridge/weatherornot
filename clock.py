@@ -2,7 +2,6 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 import forecast
-import os
 
 @sched.scheduled_job('interval', minutes=3)
 def timed_job():
