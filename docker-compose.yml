@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  forecast:
+    build: .
+    command: python clock.py
+    env_file:
+      - ./env_file.env
+    volumes:
+      - app-volume:/static/
+
+  web:
+    build: .
+    command: uvicorn src.html:app --host=0.0.0.0 --port=5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - forecast
+    volumes:
+      - app-volume:/static/
+
+volumes:
+     app-volume: 

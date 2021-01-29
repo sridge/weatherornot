@@ -24,13 +24,3 @@ COPY . .
 
 # install project requirements
 RUN pip install --no-cache-dir -r requirements.txt
-
-# start the scheduled forecast system background process
-RUN python clock.py
-# RUN nohup python clock.py > forecast.log
-
-# set app port
-EXPOSE 5000 
-
-# Run src.html when the container launches
-CMD ["uvicorn", "src.html:app", "--host=0.0.0.0", "--port=5000"]

@@ -45,7 +45,7 @@ def time_nearest_15min():
     day = now.day
     hour = now.hour
     minute = now.minute
-    minute = minute - minute%15
+    minute = minute - minute%15 #force time to be on 15 minute intervals
 
     return f'{year}-{month:02}-{day:02}T{hour:02}:{minute:02}:00Z'
 
@@ -189,8 +189,8 @@ def format_data_in_2h(median_speed,df_weather,df_weather_pred):
     return ampm,data_in
 
 def save_forecast_image(median_speed,df_forecast):
-    wdir = os.environ(['wdir'])
-    os.chdir(wdir)
+ 
+    os.chdir(os.environ['wdir'])
 
     fig = plt.figure(dpi=300)
     plt.title('Live Traffic Forecast')
@@ -212,8 +212,8 @@ def save_forecast_image(median_speed,df_forecast):
     plt.savefig('./static/forecast.png')
 
 def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],freq = '15min'):
-    wdir = os.environ(['wdir'])
-    os.chdir(wdir)
+
+    os.chdir(os.environ['wdir'])
     # currently pulling from archive because the system isn't reporting live speed anymore
     df = clean.load_speed_from_api()
     df = df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
@@ -287,8 +287,7 @@ def send_alerts(hours,
     main_url = 'http://weatherornotapi.herokuapp.com',
     port = 465):
 
-    wdir = os.environ(['wdir'])
-    os.chdir(wdir)
+    os.chdir(os.environ['wdir'])
 
     forecast_link = f'{main_url}/forecast'
 

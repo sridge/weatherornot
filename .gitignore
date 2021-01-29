@@ -115,3 +115,4 @@ forecast/forecast.egg-info/not-zip-safe
 forecast/forecast.egg-info/PKG-INFO
 forecast/forecast.egg-info/SOURCES.txt
 forecast/forecast.egg-info/top_level.txt
+env_file.env
