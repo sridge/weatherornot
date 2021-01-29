@@ -211,20 +211,37 @@ def save_forecast_image(median_speed,df_forecast):
     ax.xaxis.set_ticks_position('bottom')
     plt.savefig('./static/forecast.png')
 
-def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],freq = '15min'):
+def batch_process_speed(boro_sel,freq,
+    cache_path='./forecast/speed_cache.csv',
+    link_id_path='./forecast/linkIds.csv'):
 
     os.chdir(os.environ['wdir'])
-    # currently pulling from archive because the system isn't reporting live speed anymore
-    df = clean.load_speed_from_api()
-    df = df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
-    df = clean.subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv')
-    df_rs = clean.downsample_sensors(df,freq)
 
+    df = clean.load_speed_from_table()
+    df = clean.subset_speed_data(df,boro_sel,link_id_path)
+
+    df_cache = pd.read_csv(cache_path,parse_dates=True,index_col=0)
+    df_cache = pd.concat([df_cache,df])
+    
+    batch_size=20*4*len(df)
+    df_cache = df_cache.tail(batch_size)
+    df_cache['DataAsOf'] = df_cache['DataAsOf'].astype('datetime64[ns]')
+    df_cache.to_csv(cache_path)
+
+    df_rs = clean.downsample_sensors(df_cache,freq)
     _,median_speed = clean.nyc_median_speed(df_rs)
     median_speed = median_speed.interpolate(method='linear')
     median_speed.index = median_speed.index.tz_localize(tz='US/Eastern')
     median_speed.index = median_speed.index.tz_convert('UTC')
 
+    return median_speed
+
+def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','Brooklyn'],
+    freq = '15min'):
+
+    os.chdir(os.environ['wdir'])
+
+    median_speed = batch_process_speed(boro_sel,freq)
     df_weather,df_weather_pred = get_weather_data(freq,end_time=time_nearest_15min())
     
     # ---------------------------

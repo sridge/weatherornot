@@ -116,3 +116,8 @@ forecast/forecast.egg-info/PKG-INFO
 forecast/forecast.egg-info/SOURCES.txt
 forecast/forecast.egg-info/top_level.txt
 env_file.env
+clean/dist/clean-0.3-py3.8.egg
+clean/build/lib/clean/__init__.py
+clean/build/lib/clean/__init__.py
+clean/build/lib/clean/__init__.py
+.gitignore

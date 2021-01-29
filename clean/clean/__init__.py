@@ -47,7 +47,13 @@ def load_speed_from_csv(path):
     return pd.concat(li, axis=0, ignore_index=True)
 
 def load_speed_from_api():
+    """This official datafeed is stale, using a live feed instead (see 
+    load_speed_from_table())
 
+    Returns (pandas.DataFrame):
+        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+
+    """
     current_time_utc = datetime.datetime.utcnow()
     month = current_time_utc.day
     day = current_time_utc.month
@@ -61,10 +67,25 @@ def load_speed_from_api():
     query = f'$query={query}'
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
-
-    return pd.read_csv(f'{base_url}{query}')
+    df = pd.read_csv(f'{base_url}{query}')
+    
+    return df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
 
     # return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
+
+def load_speed_from_table():
+    """loads data from a link found here: 
+    https://www1.nyc.gov/html/dot/html/about/datafeeds.shtml#realtime
+
+    Workaround for the stale data on the official "realtime" datafeed
+
+    Returns (pandas.DataFrame):
+        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+    """
+
+    df = pd.read_table('http://207.251.86.229/nyc-links-cams/LinkSpeedQuery.txt',parse_dates=['DataAsOf'])
+    return df[['linkId','Speed','DataAsOf']]
+    
 
 def subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
