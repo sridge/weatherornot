@@ -1,7 +1,7 @@
 import datetime
 import glob
 import urllib
-
+import os
 
 import pytz
 from tqdm import tqdm
@@ -18,7 +18,7 @@ def utc_to_local(utc_dt,local_tz):
 def four_hours_ago():
 
     local_tz = pytz.timezone('US/Eastern')
-    current_time_utc = datetime.datetime.now()
+    current_time_utc = datetime.datetime.utcnow()
 
     current_time_et = utc_to_local(current_time_utc,local_tz)
 
@@ -47,20 +47,47 @@ def load_speed_from_csv(path):
     return pd.concat(li, axis=0, ignore_index=True)
 
 def load_speed_from_api():
+    """This official datafeed is stale, using a live feed instead (see 
+    load_speed_from_table())
+
+    Returns (pandas.DataFrame):
+        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+
+    """
+    current_time_utc = datetime.datetime.utcnow()
+    month = current_time_utc.day
+    day = current_time_utc.month
+    # hour = current_time_utc.hour - 9
+    # minute = current_time_utc.minute
 
     #SQL query
-    query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20<%20%272020-01-01%27%20'
-    # query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
-    #     'WHERE DATA_AS_OF > \'2020-09-01\'')
-    # print(query)
-    # query = urllib.parse.quote_plus(query)
-    query = '$query={query}'
+    query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
+             f'WHERE DATA_AS_OF > \'2020-{month:02}-{day:02}\'')
+    query = urllib.parse.quote(query)
+    query = f'$query={query}'
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
+    df = pd.read_csv(f'{base_url}{query}')
     
-    return pd.read_csv('https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T03:59:00.000%27%20%20LIMIT%2010000')
+    return df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
 
-def subset_speed_data(df,boro_sel,link_id_path='linkIds.csv'):
+    # return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
+
+def load_speed_from_table():
+    """loads data from a link found here: 
+    https://www1.nyc.gov/html/dot/html/about/datafeeds.shtml#realtime
+
+    Workaround for the stale data on the official "realtime" datafeed
+
+    Returns (pandas.DataFrame):
+        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+    """
+
+    df = pd.read_table('http://207.251.86.229/nyc-links-cams/LinkSpeedQuery.txt',parse_dates=['DataAsOf'])
+    return df[['linkId','Speed','DataAsOf']]
+    
+
+def subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
     borough and by average speed
 
@@ -79,7 +106,8 @@ def subset_speed_data(df,boro_sel,link_id_path='linkIds.csv'):
 
     # each sensor has a corresponding linkId which indicates what road segment it monitors
     # select linkIds that are in the boroughs you're interested in
-    df_link = pd.read_csv('linkIds.csv')
+    os.chdir(os.environ['wdir'])
+    df_link = pd.read_csv(link_id_path)
     link_ids = df_link[df_link['borough'].isin(boro_sel)]['link_id'].unique()
     
     df = df[df['linkId'].isin(link_ids)]
