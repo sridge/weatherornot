@@ -48,21 +48,23 @@ def load_speed_from_csv(path):
 
 def load_speed_from_api():
 
+    current_time_utc = datetime.datetime.utcnow()
+    month = current_time_utc.day
+    day = current_time_utc.month
+    # hour = current_time_utc.hour - 9
+    # minute = current_time_utc.minute
+
     #SQL query
-    # query = 'SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20<%20%272020-01-01%27%20'
-    query = ('SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF'
-             '%20BETWEEN%20%272020-01-01T00:00:00%27%20AND%20%272020-01-02T00:00:00%27%20')
-    # query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
-    #     'WHERE DATA_AS_OF > \'2020-09-01\'')
-    # print(query)
-    # query = urllib.parse.quote_plus(query)
+    query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
+             f'WHERE DATA_AS_OF > \'2020-{month:02}-{day:02}\'')
+    query = urllib.parse.quote(query)
     query = f'$query={query}'
 
     base_url = 'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?'
-    current_time_utc = datetime.datetime.utcnow()
-    hour = current_time_utc.hour - 9
-    minute = current_time_utc.minute
-    return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
+
+    return pd.read_csv(f'{base_url}{query}')
+
+    # return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
 
 def subset_speed_data(df,boro_sel,link_id_path='./forecast/linkIds.csv'):
     """takes a subset of the NYC traffic speed sensor network, by 
