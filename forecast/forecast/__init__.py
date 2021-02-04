@@ -188,15 +188,16 @@ def format_data_in_2h(median_speed,df_weather,df_weather_pred):
 
     return ampm,data_in
 
-def save_forecast_image(median_speed,df_forecast):
+def forecast_image(median_speed,df_forecast):
  
     os.chdir(os.environ['wdir'])
 
     fig = plt.figure(dpi=300)
     plt.title('Live Traffic Forecast')
-    median_speed.tz_convert('US/Eastern').plot(label='Past Traffic')
-    df_forecast['weather'].tz_convert('US/Eastern').plot(marker='.',linestyle='None',label='Forecasted Weather Impact')
-    df_forecast['no_weather'].tz_convert('US/Eastern').plot(marker='.',linestyle='None',label='Forecast Without Weather Impact')
+    df_forecast['weather'].tz_convert('US/Eastern').plot(
+        marker='.',linestyle='None',label='Forecasted Weather Impact')
+    df_forecast['no_weather'].tz_convert('US/Eastern').plot(
+        marker='.',linestyle='None',label='Forecast Without Weather Impact')
     plt.legend()
     plt.grid()
     plt.ylabel('speed (MPH)')
@@ -242,6 +243,7 @@ def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','
     os.chdir(os.environ['wdir'])
 
     median_speed = batch_process_speed(boro_sel,freq)
+    median_speed = median_speed.head(8)
     df_weather,df_weather_pred = get_weather_data(freq,end_time=time_nearest_15min())
     
     # ---------------------------
@@ -282,7 +284,7 @@ def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','
     df_forecast['no_weather'] = no_weather
     df_forecast = denormalize_speed(ampm,df_forecast)
     
-    save_forecast_image(median_speed,df_forecast)
+    forecast_image(median_speed,df_forecast)
     
     return df_forecast
 

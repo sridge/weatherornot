@@ -47,18 +47,16 @@ def load_speed_from_csv(path):
     return pd.concat(li, axis=0, ignore_index=True)
 
 def load_speed_from_api():
-    """This official datafeed is stale, using a live feed instead (see 
+    """This official datafeed is stale, using a different feed now (see 
     load_speed_from_table())
 
     Returns (pandas.DataFrame):
-        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+        DataFrame containing linkId,Speed,DataAsOf
 
     """
     current_time_utc = datetime.datetime.utcnow()
     month = current_time_utc.day
     day = current_time_utc.month
-    # hour = current_time_utc.hour - 9
-    # minute = current_time_utc.minute
 
     #SQL query
     query = ('SELECT LINK_ID,SPEED,DATA_AS_OF '
@@ -71,8 +69,6 @@ def load_speed_from_api():
     
     return df.rename(columns={'SPEED':'Speed','LINK_ID':'linkId','DATA_AS_OF':'DataAsOf'})
 
-    # return pd.read_csv(f'https://data.cityofnewyork.us/resource/i4gi-tjb9.csv?$query=SELECT%20LINK_ID,SPEED,DATA_AS_OF%20WHERE%20DATA_AS_OF%20%3E%20%272020-01-22T{hour:02}:{minute:02}:00.000%27%20%20LIMIT%2010000')
-
 def load_speed_from_table():
     """loads data from a link found here: 
     https://www1.nyc.gov/html/dot/html/about/datafeeds.shtml#realtime
@@ -80,7 +76,8 @@ def load_speed_from_table():
     Workaround for the stale data on the official "realtime" datafeed
 
     Returns (pandas.DataFrame):
-        DataFrame containing LINK_ID,SPEED,DATA_AS_OF
+        DataFrame containing linkId,Speed,DataAsOf
+
     """
 
     df = pd.read_table('http://207.251.86.229/nyc-links-cams/LinkSpeedQuery.txt',parse_dates=['DataAsOf'])
@@ -174,7 +171,7 @@ def nyc_median_speed(df_rs,set_na=True,n_sensors=153,frac=0.75):
     """ 
 
     sensor_outage = df_rs.isna().sum(axis=1)
-    tol = n_sensors-(n_sensors*0.75) # tolerance
+    tol = n_sensors-(n_sensors*0.75) # sensor outage tolerance
 
     cond_toss = sensor_outage>tol
 
@@ -198,7 +195,7 @@ def clean_median_speed(year = 2019,
     
     df_rs = downsample_sensors(df,freq)
 
-    cond_toss,median_speed = nyc_median_speed(df_rs)
+    _,median_speed = nyc_median_speed(df_rs)
 
     return median_speed
 
