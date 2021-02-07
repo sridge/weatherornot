@@ -195,9 +195,9 @@ def forecast_image(median_speed,df_forecast):
     fig = plt.figure(dpi=300)
     plt.title('Live Traffic Forecast')
     df_forecast['weather'].tz_convert('US/Eastern').plot(
-        marker='.',linestyle='None',label='Forecasted Weather Impact')
+        marker='v',label='Forecasted Weather Impact')
     df_forecast['no_weather'].tz_convert('US/Eastern').plot(
-        marker='.',linestyle='None',label='Forecast Without Weather Impact')
+        marker='o',label='Forecast Without Weather Impact')
     plt.legend()
     plt.grid()
     plt.ylabel('speed (MPH)')
