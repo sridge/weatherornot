@@ -11,9 +11,9 @@ services:
 
   web:
     build: .
-    command: uvicorn src.html:app --host=0.0.0.0 --port=5000
+    command: uvicorn src.html:app --host=0.0.0.0 --port=80
     ports:
-      - "5000:5000"
+      - "80:80"
       - "465:465"
     depends_on:
       - forecast

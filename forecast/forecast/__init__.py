@@ -243,7 +243,7 @@ def speed_forecast_2h(boro_sel = ['Manhattan','Staten Island','Queens','Bronx','
     os.chdir(os.environ['wdir'])
 
     median_speed = batch_process_speed(boro_sel,freq)
-    median_speed = median_speed.head(8)
+    median_speed = median_speed.tail(8)
     df_weather,df_weather_pred = get_weather_data(freq,end_time=time_nearest_15min())
     
     # ---------------------------
