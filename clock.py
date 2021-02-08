@@ -3,7 +3,7 @@ sched = BlockingScheduler()
 
 import forecast
 
-@sched.scheduled_job('interval', minutes=10,id='forecast')
+@sched.scheduled_job('interval', minutes=5,id='forecast')
 def timed_job():
     print('-----------------------')
     print('forecast starting')
