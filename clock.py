@@ -12,6 +12,5 @@ def timed_job():
     print('-----------------------')
     print('forecast finished')
     print('-----------------------')
-    sched.remove_job('forecast')
 
 sched.start()
