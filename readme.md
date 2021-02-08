@@ -1,5 +1,6 @@
 # Weather or Not
-Weather or Not is a service that provides live forecast of the impact of weather on the next two hours of New York City traffic. Can be deployed on an AWS instance using the included dockerfile.
+## link: (seanridge.com/weatherornot)[http://www.seanridge.com/weatherornot]
+Weather or Not is a service that provides live forecast of the impact of weather on the next two hours of New York City traffic. Deployed on an AWS instance using the included dockerfile.
 
 ## Organization
 #### forecast: 
