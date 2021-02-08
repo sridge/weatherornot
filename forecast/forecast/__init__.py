@@ -200,7 +200,7 @@ def forecast_image(median_speed,df_forecast):
         marker='o',label='Forecast Without Weather Impact')
     plt.legend()
     plt.grid()
-    plt.ylabel('speed (MPH)')
+    plt.ylabel('NYC Average Highway Speed (MPH)')
     plt.xlabel('time')
     ax = plt.gca()
     ax.spines['right'].set_visible(False)
