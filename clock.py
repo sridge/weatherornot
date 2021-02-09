@@ -12,6 +12,7 @@ def timed_job():
     print('-----------------------')
 
     p = Process(target=forecast.run_forecast_system(), name='forecast_sys')
+    p.start()
     p.join(timeout=100)
     p.terminate()
 
