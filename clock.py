@@ -1,16 +1,23 @@
+from multiprocessing import Process
+
+import forecast
 from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
-import forecast
 
-@sched.scheduled_job('interval', minutes=5,id='forecast')
+@sched.scheduled_job('interval', minutes=5, id='forecast')
 def timed_job():
     print('-----------------------')
     print('forecast starting')
     print('-----------------------')
-    forecast.run_forecast_system()
+
+    p = Process(target=forecast.run_forecast_system(), name='forecast_sys')
+    p.join(timeout=100)
+    p.terminate()
+
     print('-----------------------')
     print('forecast finished')
     print('-----------------------')
+
 
 sched.start()
