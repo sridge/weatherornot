@@ -247,6 +247,8 @@ def batch_process_speed(boro_sel, freq,
     df_rs = clean.downsample_sensors(df_cache, freq)
     _, median_speed = clean.nyc_median_speed(df_rs)
     median_speed = median_speed.interpolate(method='linear')
+    nine_hours_ago = datetime.today()-timedelta(hours=9)
+    median_speed = median_speed[median_speed.index>nine_hours_ago]
     median_speed.index = median_speed.index.tz_localize(tz='US/Eastern')
     median_speed.index = median_speed.index.tz_convert('UTC')
 
