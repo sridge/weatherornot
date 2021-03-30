@@ -225,6 +225,7 @@ def forecast_image(median_speed, df_forecast):
     ax.yaxis.set_ticks_position('none')
     ax.xaxis.set_ticks_position('bottom')
     plt.savefig('./static/forecast.png')
+    plt.close(fig)
 
 
 def batch_process_speed(boro_sel, freq,
